@@ -1,0 +1,35 @@
+% Leyla Tarhan
+% https://github.com/lytarhan
+% 10/2019
+% MATLAB R2017b
+
+% Step 2 in use case #1 (replicability analysis): make a sparse network to
+% efficiently specify the paths between voxels, along which you'll consider
+% moving activation "dirt" to make one distribution of fMRI responses equal
+% the other (the core computation behind the Wasserstein Distance). 
+
+% the alternative is a fully-connected network, which takes longer to
+% compute because the optimizer has to consider more possible paths. 
+
+% input: voxels x voxels distances among all of the voxels in your data set
+% output: a list of direct connections between voxels. 
+
+% To use this script: download the dataset "1-Replicability" from this project's OSF
+% repository (https://osf.io/m9ac3/) to a directory called "Data", which 
+% should be saved to the same directory as this script.
+
+%% clean up
+
+clear all
+close all
+clc
+
+%% File structure
+
+% [] directory with the distances between voxels:
+
+% [] directory to save the sparse edges to:
+
+%% 
+
+

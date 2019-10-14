@@ -36,7 +36,7 @@
 % To Do:
 % [] update the call to the sparse network once it's been made in MATLAB
 % [] load in meta-voxels (made in Step 2) rather than making them anew here
-% (saves some time).
+% (save
 
 %% Clean up
 

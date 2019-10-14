@@ -11,9 +11,9 @@
 % average across all the subjects in each group and save the result as a 
 % .mat file. 
 
-% To use this script: download the dataset "1-Replicability" from this project's OSF
-% repository (https://osf.io/m9ac3/) to a directory called "Data", which 
-% should be saved to the same directory as this script.
+% to use this script, download the dataset from this project's OSF
+% repository (XXX) to a directory called "Data", which should be in the same directory as
+% this script.
 
 %% clean up
 
