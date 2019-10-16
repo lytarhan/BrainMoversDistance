@@ -29,6 +29,12 @@ clc
 % directory with distance matrix between voxels, voxel coordinates
 dataDir = 'Data';
 
+% developing over-ride:
+devFlag = 1;
+if devFlag
+    dataDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Outputs\OSF - DataForGitHub\1-Replicability';
+end
+
 % directory to save the sparse edges to:
 saveDir = dataDir;
 
@@ -37,8 +43,9 @@ addpath('../utils')
 %% Setup
 
 origVoxSize = 3.0; % how large are voxels in each dimension? (assumes isotropic)
-localMaxDist = 3.0; % max distance for connecting "local" voxels in step 1
-% default: distance between voxels
+localMaxDist = 6.0; % max distance in mm for connecting "local" voxels in step 1
+% default: distance between adjacent meta-voxels (metavoxels are 2x2x2
+% original voxels)
 
 
 allowed_inflation = 1.01; % parameter to decide when to delete edges 
@@ -48,6 +55,7 @@ distRatioStability = 0.01; % parameter to decide whether the max distance
 % ratio is "stable" between iterations of refining the network -- stop 
 % when the current max distance ratio - the last iteration's max distance 
 % ratio is <= this value
+
 maxDistRatio = 1.1; % max distance ratio (captures the differences between 
 % the sparse and fully-connected networks). Use this parameter to decide
 % when the sparse network is done.
@@ -55,32 +63,63 @@ maxDistRatio = 1.1; % max distance ratio (captures the differences between
 
 % load in the voxel coordinates
 load(fullfile(dataDir, 'VoxelCoordinates.mat')) % coords
-
-% [] load in the voxels x voxels distance matrix (?? maybe just get this from coords?)
+% coords: (i, j, k) coordinates within the Talairach brain box for every
+% voxel in your subset (in the demo data, this subset is all reliable
+% voxels, mainly covering high-level visual cortex)
 
 %% meta-voxelize
 
 % downsample the data into "meta-voxels", which you'll also do with your
 % data in Step 3.
+
+% N.B.: this step takes a few minutes on a standard laptop
 [mv_to_v_mat, mv_distmat] = makeMetaVoxels(origVoxSize, coords);
 disp('made meta-voxels.')
 
+% save the meta-voxels, so you can easily load them back in during Step 3:
+save(fullfile(saveDir, 'MetaVoxels.mat'), 'mv_to_v_mat', 'mv_distmat', 'coords', 'origVoxSize');
+disp('saved meta-voxels.')
 
 %% step 1: initialize the network
 
-% ...initialize a totally unconnected graph (# vertices = # meta-voxels, but 0
-% edges)
-% [] sparse matrix (meta-voxels x meta-voxels):
-    % ...1 = voxels are connected
-    % ...0 = voxels aren't connected
+% (A) initialize a totally unconnected graph (1 vertex per meta-voxel, no edges
+% connecting them):
+nMetaVox = size(mv_distmat, 1);
+sparseNet = sparse(nMetaVox, nMetaVox);
+% store the network as a square, symmetrical sparse matrix:
+    % ...0: meta-voxels aren't connected
+    % ...1: meta-voxels are connected
+weightedSparseNet = sparse(nMetaVox, nMetaVox);
+% also set up a weighted sparse net (each cell = distance that the edge
+% traverses between the 2 meta-voxels)
 
-% ...add in local connections
-    % ...connect every voxel with its nearest neighbors (defined by some
-    % max distance)
-    % [] get the cells in the n x n distance matrix <= localMaxDist, update the corresponding entries of the sparse network matrix 
     
+% (B) add in local edges:
+% get voxels that are relatively close to each other
+localVox = logical(mv_distmat <= localMaxDist); 
+% get rid of the diagonal (don't connect voxels to themselves)
+localVox = logical(localVox - eye(nMetaVox));
+assert(all(diag(localVox)) == 0, 'Check that no voxels are connected to themselves.')
+% update the sparse network (add in the local edges)
+sparseNet(localVox) = 1;
+% updated the weighted sparse network (add in the distances for the local
+% edges)
+weightedSparseNet(localVox) = mv_distmat(localVox);
+
 
 %% step 2: add edges
+
+% (A) calculate the graph-distance between each pair of meta-voxels
+% set up a graph
+G = graph(weightedSparseNet);
+
+% [] start again here! (weights are in G.Edges table already)
+% d = distances(G) returns a matrix, d, where d(i,j) is the length of the 
+% shortest path between node i and node j. If the graph is weighted 
+% (that is, G.Edges contains a variable Weight), then those weights are 
+% used as the distances along the edges in the graph. Otherwise, all edge 
+% distances are taken to be 1.
+
 
 % ...calculate the distance ratio for each pair of voxels
     % ...graph-distance / actual brain distance
