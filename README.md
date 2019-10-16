@@ -1,5 +1,5 @@
 # BrainMoversDistance
- This repository contains code demonstrating the use of Wasserstein Distance to calculate neural dissimilarities.
+This repository contains code demonstrating the use of Wasserstein Distance to calculate neural dissimilarities. The code here was developed by Leyla Tarhan & Evan Fields.
 
 This is a work in progress, but ultimately it will contain two worked examples:
 1. Assessing the replicability (or inter-subject reliability) of your fMRI data using Wasserstein Distance.
