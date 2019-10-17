@@ -118,80 +118,18 @@ fprintf('\n\nSparse Network initialized...\n')
 
 %% step 2: add edges
 
-% [] start again here!
+% timing: c. 1 min.
 
-% timing: c. 15-30 mins
-
-fprintf('\nadding non-local edges...\n')
-
-% (A) calculate the graph-distance between each pair of meta-voxels
-% set up a graph
-G = graph(weightedSparseNet);
-% get graph distance between every pair of voxels (can only walk along
-% existing edges)
-graphDists = distances(G); 
-
-
-% (B) add edges between voxels with a high "distance ratio"
-
-% distance ratio: graph-distance / actual brain distance -- this measure
-% captures how much more efficient a fully-connected network is, compared
-% to the sparse network at its current state. Eventually, the sparse
-% network's distances should closely resemble those in full network 
-% (it shouldn't have too many long, circuitous connections between voxels),
-% but with far fewer edges. If the distance ratio between 2 voxels is much 
-% larger than 1, the sparse network's connection between the voxels is much
-% less efficient than in the fully-connected one (and we should add more 
-% edges to connect these voxels directly).
-
-% get distance ratio for every pair of voxels:
-distRatios = graphDists ./ mv_distmat;
-
-% loop through the voxel pairs with high distance ratios:
-for i = 1:nMetaVox
-    if mod(i, 100) == 0
-        fprintf('working through voxel %d / %d...\n', i, nMetaVox)
-    end
-    
-    % get the voxels with which this voxel has a high distance ratio:
-    highDistVox = find(distRatios(i, :) > allowed_distRatio);
-    
-    % loop through those voxels:
-    for v = 1:length(highDistVox)
-       j = highDistVox(v); 
-       
-       % pull out the distance ratio between voxels i & j
-       currDistRatio = distRatios(i, j);
-        
-       % probabilistically add an edge between voxels i & j, so that you're
-       % more likely to add an edge between voxels with higer distance
-       % ratios
-       prEdge = currDistRatio - allowed_distRatio;
-       if rand(1) < prEdge && sparseNet(i, j) ~= 1
-          % add the edge (symmetrically)
-          sparseNet(i, j) = 1;
-          sparseNet(j, i) = 1;
-       end
-       
-    end
-    
-end
+sparseNet2 = addEdges(sparseNet, weightedSparseNet, mv_distmat, allowed_distRatio);
 
 
 %% step 3: trim edges
 
-% ...look at every "triangle" of meta-voxels (set of 3 voxels that are all
-% directly connected)
-    % ...go through the upper triangle of the network matrix (all i's are <
-    % j)
-        % ...multiply rows i & j 
-        % ...look for 1's in the product (i & j were connected to k)
-            % ...only look in indices >= j+1 to avoid finding the same
-            % triangle multiple times
-    % ...for each edge, if sum of the other 2 edges ~ that edge, delete
-    % that edge 
-            % ...edge1 + edge2 < allowed_inflation*edge 3 --> delete edge 3
-    
+% timing: % [] 
+
+% [] start again here (takes awhile)
+sparseNet3 = trimEdges(sparseNet2, mv_distmat, allowed_inflation);
+
 % [] update distance ratios again
     
 %% step 4: refine
