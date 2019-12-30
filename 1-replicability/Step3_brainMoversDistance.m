@@ -3,6 +3,8 @@
 % 10/2019
 % MATLAB R2017b
 
+% *** THIS CODE IS STILL IN PROGRESS ***
+
 % Step 3 in use case #1 (replicability analysis): calculate the wasserstein
 % distance between all of the splits of the data, for each condition.
 

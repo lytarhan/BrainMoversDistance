@@ -93,7 +93,7 @@ for i = 1:nVox
     end
     
 end
-fprintf('...finished adding edges in %d sec!\n', toc)
+fprintf('...finished adding edges in %d minutes!\n', toc/60)
 
 %% Make the updated sparse network
 

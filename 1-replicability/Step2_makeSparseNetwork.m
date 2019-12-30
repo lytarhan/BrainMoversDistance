@@ -3,6 +3,8 @@
 % 10/2019
 % MATLAB R2017b
 
+% *** THIS CODE IS STILL IN PROGRESS ***
+
 % Step 2 in use case #1 (replicability analysis): make a sparse network to
 % efficiently specify the paths between voxels, along which you'll consider
 % moving activation "dirt" to make one distribution of fMRI responses equal
@@ -21,6 +23,7 @@
 % To Do:
 % [] add in timing estimates (for each section and at the head of the
 % script).
+% [] run edge-trimming code with devFlag = 0 & save it
 
 %% clean up
 
@@ -77,7 +80,6 @@ load(fullfile(dataDir, 'VoxelCoordinates.mat')) % coords
 
 % downsample the data into "meta-voxels", which you'll also do with your
 % data in Step 3.
-
 [mv_to_v_mat, mv_distmat] = makeMetaVoxels(origVoxSize, coords);
 disp('made meta-voxels.')
 
@@ -110,7 +112,7 @@ localVox = logical(localVox - eye(nMetaVox));
 assert(all(diag(localVox)) == 0, 'Check that no voxels are connected to themselves.')
 % update the sparse network (add in the local edges)
 sparseNet(localVox) = 1;
-% updated the weighted sparse network (add in the distances for the local
+% update the weighted sparse network (add in the distances for the local
 % edges)
 weightedSparseNet(localVox) = mv_distmat(localVox);
 
@@ -126,35 +128,87 @@ sparseNet2 = addEdges(sparseNet, weightedSparseNet, mv_distmat, allowed_distRati
 %% step 3: trim edges
 
 % timing: % [] 
+% [] re-run with devFlag = 0
 
-% [] start again here (takes awhile)
-sparseNet3 = trimEdges(sparseNet2, mv_distmat, allowed_inflation);
+[sparseNet3, weightedSparseNet2] = trimEdges(sparseNet2, mv_distmat, allowed_inflation);
 
-% [] update distance ratios again
+% get the new max distance ratio:
+currMaxRatio = getMaxDistRatio(weightedSparseNet2, mv_distmat);
     
-%% step 4: refine
+%% step 4: refine the network
+% repeat adding and trimming steps until the network becomes stable
 
-% [] repeat steps 2 & 3 until the max distance ratio becomes stable
-% [] check max distance ratio (is it within the bounds we defined above?)
+% timing: % [] 
 
-% switch to adding edges more than trimming edges
-% [] increase probability of adding an edge -- few ways to do this:
-    % ...run adding step a few times in a row without the trimming step
-    % ...increase the probabilities (multiply them all by some factor)
-    % ...decrease cutting probabilities somehow?
-% [] check max distance ratio again
+distRatioDiff = 1; % initialize the difference between max distance ratios 
+% across iterations to something arbitrary but high
+prevMaxRatio = currMaxRatio;
+sparseNet4b = sparseNet3;
+weightedSparseNet4b = weightedSparseNet2;
+
+while distRatioDiff > distRatioStability
+   % add edges:
+   sparseNet4a = addEdges(sparseNet4b, weightedSparseNet4b, mv_distmat, allowed_distRatio);
     
-% [] go through steps 2 & 3 a few more times, increasing the probability 
-% of adding an edge after each iteration
-% ...stop when the sparse network's efficiency is reasonably similar to the
-% fully-connected network
+   % trim edges:
+   [sparseNet4b, weightedSparseNet4b] = trimEdges(sparseNet4a, mv_distmat, allowed_inflation);
+   
+   % re-evaluate max distance ratio:
+   currMaxRatio = getMaxDistRatio(weightedSparseNet4b, mv_distmat);
+   
+   % get difference from the last iteration
+   distRatioDiff = prevMaxRatio - currMaxRatio;
+   prevMaxRatio = currMaxRatio; % update for the next iteration
+end
+
+%% step 5: prioritize adding edges
+
+% timing: % [] 
+
+% check max distance ratio (is it within the bounds we defined above?)
+if currMaxRatio <= maxDistRatio
+    disp('Sparse Network is DONE!')
+else % switch to adding edges more than trimming edges
+    fudgeFactor = 0.01; % allowable difference from ideal distance ratio
+    currAllowed_distRatio = allowed_distRatio; % parameter to determine probability of adding edges
+    sparseNet5c = sparseNet4b;
+    weightedSparseNet5c = weightedSparseNet4b;
+    
+    while maxDistRatio < currMaxRatio - fudgeFactor
+       % increase the probability of adding edges
+       currAllowed_distRatio = currAllowed_distRatio - 0.1; % smaller value = more likely to add an edge
+       
+       % add edges:
+       fprintf('\nadding edges - step 1:\n')
+       sparseNet5a = addEdges(sparseNet5c, weightedSparseNet5c, mv_distmat, currAllowed_distRatio);
+       
+       % add edges again:
+       fprintf('\nadding edges - step 2:\n')
+       sparseNet5b = addEdges(sparseNet5a, weightedSparseNet5c, mv_distmat, currAllowed_distRatio);
+       
+       % trim edges:
+       [sparseNet5c, weightedSparseNet5c] = trimEdges(sparseNet5b, mv_distmat, allowed_inflation);
+       
+       % re-evaluate max distance ratio:
+       currMaxRatio = getMaxDistRatio(weightedSparseNet5c, mv_distmat);
+    
+       
+    end
+    disp('Sparse Network is DONE!')
+end
+
 
 %% save the sparse network
 
 % format: matrix, where each row = 1 edge (col 1 = voxel 1; col 2 = voxel
 % 2)
+[Vox1, Vox2] = find(sparseNet5c); % get indices for the non-zero elements in the sparse net (symmetrical)
+T = table(Vox1, Vox2);
 
-% [] save as a .csv or .mat file
+% write to .csv:
+disp('Saving sparse network...')
+writetable(T, fullfile(saveDir, 'sparseEdges.csv'), 'Delimiter', ',');
+fprintf('\n\nDONE!! \nSaved sparse network as a .csvin dataDir.\n')
 
 
     

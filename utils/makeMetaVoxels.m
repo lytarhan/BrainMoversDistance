@@ -133,6 +133,6 @@ for mv = 1:n_metavoxels
 end
 
 
-fprintf('making %d voxels into %d meta-voxelsde meta-voxels took %0.2f s\n', size(vox_coords, 1), n_metavoxels, toc)
+fprintf('making %d voxels into %d meta-voxels took %0.2f s\n', size(vox_coords, 1), n_metavoxels, toc)
 
 end
