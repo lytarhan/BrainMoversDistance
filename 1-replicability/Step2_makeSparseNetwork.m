@@ -78,6 +78,10 @@ load(fullfile(dataDir, 'VoxelCoordinates.mat')) % coords
 
 % timing: a few minutes (on a standard laptop)
 
+clc
+fprintf('Step 0: Downsampling the Data\n')
+fprintf('...................................\n\n')
+
 % downsample the data into "meta-voxels", which you'll also do with your
 % data in Step 3.
 [mv_to_v_mat, mv_distmat] = makeMetaVoxels(origVoxSize, coords);
@@ -90,6 +94,10 @@ disp('saved meta-voxels.')
 %% step 1: initialize the network
 
 % timing: a few seconds
+
+clc
+fprintf('Step 1: Initializing the Network\n')
+fprintf('...................................\n\n')
 
 % (A) initialize a totally unconnected graph (1 vertex per meta-voxel, no edges
 % connecting them):
@@ -122,6 +130,11 @@ fprintf('\n\nSparse Network initialized...\n')
 
 % timing: c. 1 min.
 
+
+clc
+fprintf('Step 2: Adding Edges\n')
+fprintf('........................\n\n')
+
 sparseNet2 = addEdges(sparseNet, weightedSparseNet, mv_distmat, allowed_distRatio);
 
 
@@ -130,15 +143,26 @@ sparseNet2 = addEdges(sparseNet, weightedSparseNet, mv_distmat, allowed_distRati
 % timing: % [] 
 % [] re-run with devFlag = 0
 
+
+clc
+fprintf('Step 3: Trimming Edges\n')
+fprintf('........................\n\n')
+
 [sparseNet3, weightedSparseNet2] = trimEdges(sparseNet2, mv_distmat, allowed_inflation);
 
 % get the new max distance ratio:
 currMaxRatio = getMaxDistRatio(weightedSparseNet2, mv_distmat);
     
-%% step 4: refine the network
+%% step 4: stabilize the network
 % repeat adding and trimming steps until the network becomes stable
 
 % timing: % [] 
+
+
+clc
+fprintf('Step 4: Stabilizing the Network\n')
+fprintf('................................\n\n')
+
 
 distRatioDiff = 1; % initialize the difference between max distance ratios 
 % across iterations to something arbitrary but high
@@ -164,6 +188,12 @@ end
 %% step 5: prioritize adding edges
 
 % timing: % [] 
+
+
+clc
+fprintf('Step 5: Refining the Network\n')
+fprintf('................................\n\n')
+
 
 % check max distance ratio (is it within the bounds we defined above?)
 if currMaxRatio <= maxDistRatio

@@ -3,7 +3,6 @@
 % 10/2019
 % MATLAB R2017b
 
-% *** THIS CODE IS STILL IN PROGRESS ***
 
 % Step 3 in use case #1 (replicability analysis): calculate the wasserstein
 % distance between all of the splits of the data, for each condition.
@@ -35,10 +34,6 @@
 % NB: This script takes a long time to run (up to 24 hours on my PC). 
 % I suggest letting it run over the weekend.
 
-% To Do:
-% [] update the call to the sparse network once it's been made in MATLAB
-% [] load in meta-voxels (made in Step 2) rather than making them anew here
-% (saves some time).
 
 %% Clean up
 
@@ -52,12 +47,22 @@ dataDir = fullfile('Data');
 saveDir = 'Results';
 if ~exist(saveDir, 'dir'); mkdir(saveDir); end
 
+% developing over-ride:
+devFlag = 1;
+if devFlag
+    dataDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Outputs\OSF - DataForGitHub\1-Replicability';
+end
+
+
 addpath('../utils')
 
 %% set up some parameters
 
 % scrambling to get a baseline?
-scramFlag = 1;
+scramFlag = 0;
+
+% ran step 2? (default = 1):
+step2Flag = 1;
 
 % how many splits in the data? (must match # of splits made in
 % Step1_makeSplits)
@@ -83,18 +88,22 @@ end
 % voxel coordinates
 load(fullfile(dataDir, 'VoxelCoordinates.mat')) % coords
 
-% sparse network specifying a subset of edges between meta-voxels:
-% [] this part will change! step 2 makes the sparse network, probably saves
-% it as a .mat file instead
-% sn = csvread('example_graph_csv.csv');
+% sparse network specifying a subset of edges between meta-voxels (made in step 2):
+sn = readtable(fullfile(dataDir, 'sparseEdges.csv'));
 
 whos
 
 %% Make meta-voxels
 
-% downsample the data into "meta-voxels" (2x2x2 original voxels).
-[mv_to_v_mat, mv_distmat] = makeMetaVoxels(origVoxSize, coords);
+% either downsample the data here or load the meta-voxels made in step 2:
+if step2Flag
+    load(fullfile(dataDir, 'MetaVoxels.mat'));
+else
+    % downsample the data into "meta-voxels" (2x2x2 original voxels).
+    [mv_to_v_mat, mv_distmat] = makeMetaVoxels(origVoxSize, coords);
+end
 disp('made meta-voxels.')
+
 % output: 
 % (1) sparse matrix (original voxels x meta-voxels) marking members of each
 % meta-voxel

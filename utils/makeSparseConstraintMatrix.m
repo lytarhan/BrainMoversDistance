@@ -27,6 +27,9 @@ function [A, cTranspose] = makeSparseConstraintMatrix(distMat, sparseNet)
     
 %% setup
 
+% convert sparse network to array:
+sparseNet = table2array(sparseNet);
+
 % make sure distMat is square
 assert(size(distMat, 1) == size(distMat, 2), 'distMat should be square.')
 
