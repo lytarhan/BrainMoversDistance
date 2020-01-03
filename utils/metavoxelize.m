@@ -41,10 +41,11 @@ for g = 1:2
     % handle input -- assumes activations = nVoxels x 1 condition
     activations = [];
     if g == 1
-        activations = activations1;
+        activations = double(activations1);
     elseif g == 2
-        activations = activations2;
+        activations = double(activations2);
     end
+    
     
     % multiply membership matrix by activations matrix -- because we're
     % aggregating by summing over activations in every original voxel in

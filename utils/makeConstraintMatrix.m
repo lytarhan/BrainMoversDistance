@@ -34,9 +34,9 @@ assert(size(distMat, 1) == size(distMat, 2), 'distMat should be square.')
 % # meta-voxels
 n = size(distMat, 1);
 
-% debugging version:
-disp('toy dataset.')
-n = 1500;
+% % debugging version:
+% disp('toy dataset.')
+% n = 1500;
 
 % constraint matrix (has to be a sparse matrix):
 if speedyFlag
