@@ -1,13 +1,16 @@
 % Leyla Tarhan
-% 5/2019
+% https://github.com/lytarhan
+% 1/2020
 % MATLAB R2017b
 
-% compare brain-behavior correlation when neural dissimilarity is computed
-% using correlation distance vs. wasserstein distance (compared to a
-% scrambled model baseline, which type of neural dissimilarity is more
-% similar to behavioral dissimilarity?)
 
-% To Do:
+% Step 3 in use case #2 (representational similarity analysis): 
+% compare brain-behavior correlations when neural dissimilarity is computed
+% using correlation distance vs. wasserstein distance. Compare them with 
+% reference to the results from Step 2b, when the matrices were scrambled. 
+% Put another way, which distance metric produces a neural dissimilarity 
+% matrix that more closely resembles the behavioral dissimilarity matrix, 
+% compared to a scrambled baseline?
 
 
 %% clean up
@@ -19,12 +22,21 @@ clc
 %% file structure
 
 % results from RSA:
-dataDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Experiment - ExploringObjectsRSA\Analysis\Results';
+dataDir = 'Results';
 
-% helpers:
-addpath(genpath('C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Code - frequent helpers'));
+% developing over-ride:
+devFlag = 1;
+if devFlag
+    dataDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Outputs\OSF - DataForGitHub\2-RepresentationalSimilarity\Results';
+end
+
+
+addpath('../utils')
+
+
 
 %% load in RSA results
+% from Steps 2a and 2b
 
 % intact data:
 intactData = load(fullfile(dataDir, 'Brain-VisSearchRSA.mat'));
@@ -34,7 +46,7 @@ scramData = load(fullfile(dataDir, 'Brain-VisSearchRSA_Scrambled.mat'));
 
 %% Summarize results
 
-% (1) check out all 4 bars at once:
+% (1) check out all 4 bars at once, to get a sense of how the intact vs. scrambled data compare:
 intactScramData = [mean(intactData.rsaCorr), mean(mean(scramData.rsaScramCorr)); mean(intactData.rsaWD), mean(mean(scramData.rsaScramWD))];
 b1 = bar(intactScramData);
 legend({'intact', 'scrambled'});
@@ -61,7 +73,7 @@ saveFigureHelper(1, dataDir, 'Brain-VisSearch_corrVSwasserstein_vsScram.png')
 % Q: compared to scrambled-model baseline, is the brain-behavior 
 % correlation higher when you measure neural dissimilarity using 
 % correlation distance or wasserstein distance?
-
+clc
 [h, p, ci, stats] = ttest(rDiffVsScram, wdDiffVsScram);
 if h > 0
     disp('there''s a difference between correlation and wasserstein distance, vs. scrambled baseline!');

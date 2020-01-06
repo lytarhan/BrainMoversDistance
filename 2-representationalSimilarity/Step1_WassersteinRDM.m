@@ -13,7 +13,7 @@
 % .21 mins to calculate 100 distances. So, in the demo data (with 72
 % conditions, or 2556 pairs of conditions, it took about 8.9 hours per subject).
 
-% N.B.: you could save time by making a sparse network, first, like in use
+% N.B.: you could save time by making a sparse network first, like in use
 % case #1. However, since ROI's are generally smaller than the large swathe
 % of cortex that I was working with in use case #1, this isn't as necessary
 % here.
@@ -51,7 +51,7 @@
     % could also measure geodesic distance, connectivity distance, etc.) (#
     % voxels x # voxels)
     % -corrRDM: comparison neural RDM, based on another distance metric
-    % (e.g., correlation) -- this isn't necessary until later steps.
+    % (e.g., correlation) -- this isn't necessary until Step 2.
     
 % save all of these subject-specific structs in a single .mat file named
 % 'FormattedData_allSubs.mat' in a directory at the same level as this
@@ -66,14 +66,14 @@ clc
 
 %% file structure
 
-dataDir = 'Data';
+dataDir = 'Data-fMRI';
 saveDir = fullfile(dataDir, 'Wasserstein RDMs');
 if ~exist(saveDir, 'dir'); mkdir(saveDir); end
 
 % developing over-ride:
 devFlag = 1;
 if devFlag
-    dataDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Outputs\OSF - DataForGitHub\2-RepresentationalSimilarity';
+    dataDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Outputs\OSF - DataForGitHub\2-RepresentationalSimilarity\Data-fMRI';
 end
 
 

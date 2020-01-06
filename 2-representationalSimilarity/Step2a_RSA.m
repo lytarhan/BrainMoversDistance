@@ -1,13 +1,15 @@
 % Leyla Tarhan
-% 5/2019
+% https://github.com/lytarhan
+% 1/2020
 % MATLAB R2017b
 
-% relate neural and behavioral dissimilarities (comparing the results when
-% neural dissimilarity is calculated using correlation distance vs.
-% wasserstein distance). 
 
+% Step 2a in use case #2 (representational similarity analysis): relate 
+% neural and behavioral dissimilarities (separately for each subject, in a 
+% pre-defined brain region of interest). Do this with neural 
+% dissimilarities calculated using correlation distance and Wasserstein 
+% Distance. 
 
-% To Do:
 
 %% clean up
 
@@ -17,24 +19,28 @@ clc
 
 %% file structure
 
-topDataDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Experiment - ExploringObjectsRSA\Analysis';
+topDir = pwd;
 
-% behavioral data
-bDataDir = fullfile(topDataDir, 'Data - Behavior');
+% developing over-ride:
+devFlag = 1;
+if devFlag
+    topDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Outputs\OSF - DataForGitHub\2-RepresentationalSimilarity';
+end
 
-% wasserstein RDMs
-wdDataDir = fullfile(topDataDir, 'Data - fMRI', 'Wasserstein RDMs');
+bDataDir = fullfile(topDir, 'Data-Behavior'); % behavioral data
+wdDataDir = fullfile(topDir, 'Data-fMRI', 'Wasserstein RDMs'); % neural RDMs, made using Wasserstein distance
+rDataDir = fullfile(topDir, 'Data-fMRI'); % neural RDMs, made using correlation distance
 
-% correlation-distance RDMs
-rDataDir = fullfile(topDataDir, 'Data - fMRI', 'FormattedData');
+saveDir = fullfile(topDir, 'Results');
+if ~exist(saveDir, 'dir'); mkdir(saveDir); end
 
-% figure- and results-saving
-saveDir = fullfile(topDataDir, 'Results');
-if~exist(saveDir, 'dir'); mkdir(saveDir); end
+addpath('../utils')
 
-% helpers:
-addpath(genpath('C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Code - frequent helpers'));
+%% setup
 
+% how many conditions in the data?
+nConds = 72;
+nPairs = factorial(nConds) / (factorial(2) * factorial(nConds - 2));
 
 %% format the data
 % output:
@@ -43,10 +49,6 @@ addpath(genpath('C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Code - frequen
 % dissimilar)
 % ...WD RDM for each fMRI sub (higher values = more dissimlar)
 
-
-% how many conds?
-nConds = 72;
-nPairs = factorial(nConds) / (factorial(2) * factorial(nConds - 2));
 
 % behavioral data (visual search times):
 vsData = load(fullfile(bDataDir, 'SearchData'));
@@ -68,32 +70,11 @@ for s = 1:length(subs)
     wdDistMat(:, s) = getLowerTri(wdData.rdmCube(:, :, s));
 end
 
-% make sure behavioral and neural RDMs are in the same order
-for p = 1:nPairs
-   % which items in the visual search data?
-   vs1 = vsData.SearchData.labelIm1{p};
-   vs2 = vsData.SearchData.labelIm2{p};
-   
-   % which items in the neural data?
-   currConds = wdData.ConditionPairs(p, :);
-   neural1 = bpData.CondNames{currConds(1)};
-   neural2 = bpData.CondNames{currConds(2)};
-   
-   % do they match?
-   match1 = strcmp(vs1, neural1) || strcmp(vs1, neural2);
-   match2 = strcmp(vs2, neural1) || strcmp(vs2, neural2);
-   if ~match1 || ~match2
-       disp('mismatch!')
-       keyboard
-   end
-end
-disp('neural and behavioral RDMs are in the same order!')
 
 %% compare the RDMs
 
 % quick check: how similar are correlation-based and wasserstein-based
-% dissimilarity?
-% - correlate the RDMs for each sub
+% dissimilarity? Correlate these two RDMs for each subject.
 rdmCorrs = nan(length(subs), 1);
 for s = 1:length(subs)
    rRDM = rDistMat(:, s);
@@ -155,11 +136,10 @@ xticklabels({'correlation distance', 'wasserstein distance'})
 saveFigureHelper(1, saveDir, 'Brain-VisSearch_corrVSwasserstein.png')
 
 %% Preliminary stats
-% ultimately, will need to incorporate scrambled performance into these!
 
 % Q: is there a difference in the brain-behavior correlation between the
 % two neural dissimilarity metrics?
-
+clc
 [h, p, ci, stats] = ttest(rsaCorr, rsaWD);
 if h > 0
     disp('there''s a difference between correlation and wasserstein distance!');

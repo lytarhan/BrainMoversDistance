@@ -1,12 +1,16 @@
 % Leyla Tarhan
-% 5/2019
+% https://github.com/lytarhan
+% 1/2020
 % MATLAB R2017b
 
-% relate scrambled neural and intact behavioral dissimilarities (set a
-% baseline for comparing RSA using wasserstein and correlation distance).
 
-
-% To Do:
+% Step 2b in use case #2 (representational similarity analysis): relate 
+% neural and behavioral dissimilarities (separately for each subject, in a 
+% pre-defined brain region of interest). Do this with neural 
+% dissimilarities calculated using correlation distance and Wasserstein 
+% Distance. This time, scrambled the neural dissimilarities and relate them
+% to the intact behavioral dissimilarities, to set a baseline for the RSA
+% results. 
 
 
 %% clean up
@@ -15,34 +19,33 @@ clear all
 close all
 clc
 
+%% file structure
+
+topDir = pwd;
+
+% developing over-ride:
+devFlag = 1;
+if devFlag
+    topDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Outputs\OSF - DataForGitHub\2-RepresentationalSimilarity';
+end
+
+bDataDir = fullfile(topDir, 'Data-Behavior'); % behavioral data
+wdDataDir = fullfile(topDir, 'Data-fMRI', 'Wasserstein RDMs'); % neural RDMs, made using Wasserstein distance
+rDataDir = fullfile(topDir, 'Data-fMRI'); % neural RDMs, made using correlation distance
+
+saveDir = fullfile(topDir, 'Results');
+if ~exist(saveDir, 'dir'); mkdir(saveDir); end
+
+addpath('../utils')
+
 %% setup
 
-% how many conds?
+% how many conditions in the data?
 nConds = 72;
 nPairs = factorial(nConds) / (factorial(2) * factorial(nConds - 2));
 
 % how many iterations for scrambling?
 iters = 100;
-
-%% file structure
-
-topDataDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Experiment - ExploringObjectsRSA\Analysis';
-
-% behavioral data
-bDataDir = fullfile(topDataDir, 'Data - Behavior');
-
-% wasserstein RDMs
-wdDataDir = fullfile(topDataDir, 'Data - fMRI', 'Wasserstein RDMs');
-
-% correlation-distance RDMs
-rDataDir = fullfile(topDataDir, 'Data - fMRI', 'FormattedData');
-
-% figure- and results-saving
-saveDir = fullfile(topDataDir, 'Results');
-if~exist(saveDir, 'dir'); mkdir(saveDir); end
-
-% helpers:
-addpath(genpath('C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Code - frequent helpers'));
 
 
 %% format the data
@@ -72,27 +75,6 @@ wdDistMat = nan(nPairs, length(subs));
 for s = 1:length(subs)
     wdDistMat(:, s) = getLowerTri(wdData.rdmCube(:, :, s));
 end
-
-% make sure behavioral and neural RDMs are in the same order
-for p = 1:nPairs
-   % which items in the visual search data?
-   vs1 = vsData.SearchData.labelIm1{p};
-   vs2 = vsData.SearchData.labelIm2{p};
-   
-   % which items in the neural data?
-   currConds = wdData.ConditionPairs(p, :);
-   neural1 = bpData.CondNames{currConds(1)};
-   neural2 = bpData.CondNames{currConds(2)};
-   
-   % do they match?
-   match1 = strcmp(vs1, neural1) || strcmp(vs1, neural2);
-   match2 = strcmp(vs2, neural1) || strcmp(vs2, neural2);
-   if ~match1 || ~match2
-       disp('mismatch!')
-       keyboard
-   end
-end
-disp('neural and behavioral RDMs are in the same order!')
 
 %% RSA with scrambling: loop through the subs
 
