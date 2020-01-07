@@ -70,13 +70,6 @@ dataDir = 'Data-fMRI';
 saveDir = fullfile(dataDir, 'Wasserstein RDMs');
 if ~exist(saveDir, 'dir'); mkdir(saveDir); end
 
-% developing over-ride:
-devFlag = 1;
-if devFlag
-    dataDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Outputs\OSF - DataForGitHub\2-RepresentationalSimilarity\Data-fMRI';
-end
-
-
 addpath('../utils')
 
 

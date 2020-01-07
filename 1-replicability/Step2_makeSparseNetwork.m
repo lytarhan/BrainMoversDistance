@@ -20,10 +20,6 @@
 % repository (https://osf.io/m9ac3/) to a directory called "Data", which 
 % should be saved to the same directory as this script.
 
-% To Do:
-% [] add in timing estimates (for each section and at the head of the
-% script).
-% [] run edge-trimming code with devFlag = 0 & save it
 
 %% clean up
 
@@ -35,12 +31,6 @@ clc
 
 % directory with distance matrix between voxels, voxel coordinates
 dataDir = 'Data';
-
-% developing over-ride:
-devFlag = 1;
-if devFlag
-    dataDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Outputs\OSF - DataForGitHub\1-Replicability';
-end
 
 % directory to save the sparse edges to:
 saveDir = dataDir;
@@ -141,8 +131,6 @@ sparseNet2 = addEdges(sparseNet, weightedSparseNet, mv_distmat, allowed_distRati
 %% step 3: trim edges
 
 % timing: % [] 
-% [] re-run with devFlag = 0
-
 
 clc
 fprintf('Step 3: Trimming Edges\n')

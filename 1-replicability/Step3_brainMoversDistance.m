@@ -47,13 +47,6 @@ dataDir = fullfile('Data');
 saveDir = 'Results';
 if ~exist(saveDir, 'dir'); mkdir(saveDir); end
 
-% developing over-ride:
-devFlag = 1;
-if devFlag
-    dataDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Outputs\OSF - DataForGitHub\1-Replicability';
-end
-
-
 addpath('../utils')
 
 %% set up some parameters
@@ -61,7 +54,7 @@ addpath('../utils')
 % scrambling to get a baseline?
 scramFlag = 0;
 
-% ran step 2? (default = 1):
+% ran step 2 to get a sparse network? (default = 1):
 step2Flag = 1;
 
 % how many splits in the data? (must match # of splits made in

@@ -21,12 +21,6 @@ clc
 
 topDir = pwd;
 
-% developing over-ride:
-devFlag = 1;
-if devFlag
-    topDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Outputs\OSF - DataForGitHub\2-RepresentationalSimilarity';
-end
-
 bDataDir = fullfile(topDir, 'Data-Behavior'); % behavioral data
 wdDataDir = fullfile(topDir, 'Data-fMRI', 'Wasserstein RDMs'); % neural RDMs, made using Wasserstein distance
 rDataDir = fullfile(topDir, 'Data-fMRI'); % neural RDMs, made using correlation distance

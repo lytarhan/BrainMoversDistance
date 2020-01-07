@@ -24,12 +24,6 @@ clc
 % results from RSA:
 dataDir = 'Results';
 
-% developing over-ride:
-devFlag = 1;
-if devFlag
-    dataDir = 'C:\Users\Leyla\Dropbox (KonkLab)\Research-Tarhan\Project - BrainMoversDistance\Outputs\OSF - DataForGitHub\2-RepresentationalSimilarity\Results';
-end
-
 
 addpath('../utils')
 
