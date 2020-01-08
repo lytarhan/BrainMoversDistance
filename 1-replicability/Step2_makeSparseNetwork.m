@@ -130,7 +130,7 @@ sparseNet2 = addEdges(sparseNet, weightedSparseNet, mv_distmat, allowed_distRati
 
 %% step 3: trim edges
 
-% timing: % [] 
+% timing: c. 73 hours (longest part of this process)
 
 clc
 fprintf('Step 3: Trimming Edges\n')
@@ -144,7 +144,7 @@ currMaxRatio = getMaxDistRatio(weightedSparseNet2, mv_distmat);
 %% step 4: stabilize the network
 % repeat adding and trimming steps until the network becomes stable
 
-% timing: % [] 
+% timing: c. 30-40 mins 
 
 
 clc
