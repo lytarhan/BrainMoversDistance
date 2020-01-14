@@ -1,9 +1,7 @@
 % Leyla Tarhan & Evan Fields
 % https://github.com/lytarhan
-% 10/2019
+% 1/2020
 % MATLAB R2017b
-
-% *** THIS CODE IS STILL IN PROGRESS ***
 
 % Step 2 in use case #1 (replicability analysis): make a sparse network to
 % efficiently specify the paths between voxels, along which you'll consider
@@ -19,7 +17,6 @@
 % To use this script: download the dataset "1-Replicability" from this project's OSF
 % repository (https://osf.io/m9ac3/) to a directory called "Data", which 
 % should be saved to the same directory as this script.
-
 
 %% clean up
 
@@ -81,6 +78,8 @@ disp('made meta-voxels.')
 save(fullfile(saveDir, 'MetaVoxels.mat'), 'mv_to_v_mat', 'mv_distmat', 'coords', 'origVoxSize');
 disp('saved meta-voxels.')
 
+fprintf('Step 0: done.\n')
+
 %% step 1: initialize the network
 
 % timing: a few seconds
@@ -114,7 +113,8 @@ sparseNet(localVox) = 1;
 % edges)
 weightedSparseNet(localVox) = mv_distmat(localVox);
 
-fprintf('\n\nSparse Network initialized...\n')
+fprintf('\n\n...Sparse Network initialized.\n')
+fprintf('Step 1: done.\n')
 
 %% step 2: add edges
 
@@ -127,6 +127,7 @@ fprintf('........................\n\n')
 
 sparseNet2 = addEdges(sparseNet, weightedSparseNet, mv_distmat, allowed_distRatio);
 
+fprintf('Step 2: done.\n')
 
 %% step 3: trim edges
 
@@ -140,6 +141,11 @@ fprintf('........................\n\n')
 
 % get the new max distance ratio:
 currMaxRatio = getMaxDistRatio(weightedSparseNet2, mv_distmat);
+
+fprintf('Step 3: done (finally!).\n')
+
+% clean up:
+clear sparseNet
     
 %% step 4: stabilize the network
 % repeat adding and trimming steps until the network becomes stable
@@ -173,9 +179,15 @@ while distRatioDiff > distRatioStability
    prevMaxRatio = currMaxRatio; % update for the next iteration
 end
 
+fprintf('Step 4: done.\n')
+
+
+% clean up:
+clear sparseNet2 weightedSparseNet sparseNet3 weightedSparseNet2
+
 %% step 5: prioritize adding edges
 
-% timing: % [] 
+% timing: % ~75 hours 
 
 
 clc
@@ -188,7 +200,7 @@ if currMaxRatio <= maxDistRatio
     disp('Sparse Network is DONE!')
 else % switch to adding edges more than trimming edges
     fudgeFactor = 0.01; % allowable difference from ideal distance ratio
-    currAllowed_distRatio = allowed_distRatio; % parameter to determine probability of adding edges
+    currAllowed_distRatio = 1.15; % parameter to determine probability of adding edges -- make it a bit higher now bc otherwise takes too long to converge
     sparseNet5c = sparseNet4b;
     weightedSparseNet5c = weightedSparseNet4b;
     
